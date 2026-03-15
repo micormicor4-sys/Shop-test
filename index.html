@@ -544,28 +544,7 @@ function buildMenuItemEl(shop, item) {
 }
 
 function toggleShop(id) {
-  const target  = document.getElementById('shop-' + id);
-  const isOpen  = target.classList.contains('open');
-
-  // Close any other open shop — lock scroll position so the page doesn't jump
-  document.querySelectorAll('.shop-card.open').forEach(card => {
-    if (card.id !== 'shop-' + id) {
-      const scrollY = window.scrollY;
-      card.classList.remove('open');
-      // After removing the class, the menu collapses and page height shrinks.
-      // Force the scroll position to stay exactly where it was.
-      window.scrollTo({ top: scrollY, behavior: 'instant' });
-    }
-  });
-
-  // Toggle the tapped shop
-  if (!isOpen) {
-    target.classList.add('open');
-  } else {
-    const scrollY = window.scrollY;
-    target.classList.remove('open');
-    window.scrollTo({ top: scrollY, behavior: 'instant' });
-  }
+  document.getElementById('shop-' + id).classList.toggle('open');
 }
 
 // ═══════════════ MENU QTY LOGIC ═════════════════
