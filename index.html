@@ -197,53 +197,74 @@
   #modal-menu-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
   /* ── MENU ITEM ── */
-  .menu-item { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color .2s; }
+  .menu-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color .2s;
+  }
   .menu-item:hover { border-color: rgba(240,192,64,.3); }
-  .menu-photo-wrap { width: 100%; height: 175px; overflow: hidden; background: #111; position: relative; }
-  .menu-photo-wrap::before { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--card) 25%, var(--surface) 50%, var(--card) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; z-index: 0; }
-  .menu-photo-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; position: relative; z-index: 1; transition: transform .35s; }
-  .menu-item:hover .menu-photo-wrap img { transform: scale(1.04); }
-  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  .menu-photo-wrap {
+    width: 100%; height: 175px;
+    overflow: hidden; background: var(--surface); position: relative;
+  }
+  .menu-photo-wrap img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .3s;
+  }
+  .menu-item:hover .menu-photo-wrap img { transform: scale(1.03); }
 
   .menu-item-body { padding: 12px 14px 14px; }
-  .menu-item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
-  .menu-item-name { font-family: var(--font-head); font-size: 15px; font-weight: 700; line-height: 1.2; }
-  .menu-item-price { font-size: 16px; font-weight: 800; color: var(--accent); flex-shrink: 0; white-space: nowrap; }
-  .menu-item-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 12px; }
 
-  /* Bottom action row: [−] [qty] [+]  [Add to Cart] */
+  .menu-item-top {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 8px; margin-bottom: 4px;
+  }
+  .menu-item-name {
+    font-family: var(--font-head); font-size: 15px;
+    font-weight: 700; line-height: 1.2; color: var(--text);
+  }
+  .menu-item-price {
+    font-size: 16px; font-weight: 800;
+    color: var(--accent); flex-shrink: 0; white-space: nowrap;
+  }
+  .menu-item-desc {
+    font-size: 12px; color: var(--muted);
+    line-height: 1.5; margin-bottom: 12px;
+  }
+
+  /* action row: qty ctrl + add button */
   .menu-item-actions {
     display: flex; align-items: center; gap: 10px;
   }
   .menu-qty-ctrl {
-    display: flex; align-items: center; gap: 0;
-    background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; flex-shrink: 0;
+    display: flex; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; flex-shrink: 0;
   }
   .menu-qty-btn {
     width: 36px; height: 36px;
     background: none; color: var(--text);
-    font-size: 18px; font-weight: 700;
+    font-size: 18px; font-weight: 700; border: none;
     display: flex; align-items: center; justify-content: center;
-    transition: background .15s, color .15s;
-    border: none;
+    transition: background .15s, color .15s; cursor: pointer;
   }
   .menu-qty-btn:hover { background: var(--accent); color: #000; }
   .menu-qty-num {
-    font-size: 15px; font-weight: 800;
-    min-width: 30px; text-align: center;
-    color: var(--text); padding: 0 2px;
+    font-size: 15px; font-weight: 800; color: var(--text);
+    min-width: 32px; text-align: center; padding: 0 2px;
   }
   .menu-add-btn {
     flex: 1; background: var(--accent); color: #000;
     font-family: var(--font-head); font-size: 13px; font-weight: 700;
-    padding: 10px 12px; border-radius: 10px;
+    padding: 10px 12px; border-radius: 10px; border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: opacity .2s, transform .1s;
-    white-space: nowrap;
+    transition: opacity .2s, transform .1s; white-space: nowrap;
   }
   .menu-add-btn:hover { opacity: .85; }
   .menu-add-btn:active { transform: scale(.97); }
-  /* when qty > 0, button turns green "Added" state */
   .menu-add-btn.in-cart { background: var(--green); }
 
   /* ── CART PAGE ── */
@@ -528,88 +549,43 @@ function renderShops() {
 }
 
 function buildMenuItemEl(shop, item) {
-  const ci = cart.find(c => c.itemId === item.id);
+  const ci  = cart.find(c => c.itemId === item.id);
   const qty = ci ? ci.qty : 0;
 
-  const wrapper = document.createElement('div');
-  wrapper.className = 'menu-item';
-  wrapper.id = 'mi-' + item.id;
+  const div = document.createElement('div');
+  div.className = 'menu-item';
+  div.id = 'mi-' + item.id;
 
-  // Photo
-  const photoWrap = document.createElement('div');
-  photoWrap.className = 'menu-photo-wrap';
-  const img = document.createElement('img');
-  img.src = item.image || '';
-  img.alt = item.name;
-  img.loading = 'lazy';
-  photoWrap.appendChild(img);
+  div.innerHTML = `
+    <div class="menu-photo-wrap">
+      <img src="${item.image || ''}" alt="${item.name}" loading="lazy" />
+    </div>
+    <div class="menu-item-body">
+      <div class="menu-item-top">
+        <div class="menu-item-name">${item.name}</div>
+        <div class="menu-item-price">RM ${Number(item.price).toFixed(2)}</div>
+      </div>
+      <div class="menu-item-desc">${item.desc}</div>
+      <div class="menu-item-actions">
+        <div class="menu-qty-ctrl">
+          <button class="menu-qty-btn" id="mminus-${item.id}">−</button>
+          <span class="menu-qty-num" id="mqty-${item.id}">${qty}</span>
+          <button class="menu-qty-btn" id="mplus-${item.id}">+</button>
+        </div>
+        <button class="menu-add-btn ${qty > 0 ? 'in-cart' : ''}" id="madd-${item.id}">
+          ${qty > 0
+            ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> In Cart`
+            : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Add to Cart`}
+        </button>
+      </div>
+    </div>
+  `;
 
-  // Body
-  const body = document.createElement('div');
-  body.className = 'menu-item-body';
+  div.querySelector('#mminus-' + item.id).addEventListener('click', () => menuAdjustQty(shop, item, -1));
+  div.querySelector('#mplus-'  + item.id).addEventListener('click', () => menuAdjustQty(shop, item,  1));
+  div.querySelector('#madd-'   + item.id).addEventListener('click', () => menuAddToCart(shop, item));
 
-  // Top row
-  const top = document.createElement('div');
-  top.className = 'menu-item-top';
-  const nameEl = document.createElement('div');
-  nameEl.className = 'menu-item-name';
-  nameEl.textContent = item.name;
-  const priceEl = document.createElement('div');
-  priceEl.className = 'menu-item-price';
-  priceEl.textContent = 'RM ' + Number(item.price).toFixed(2);
-  top.appendChild(nameEl);
-  top.appendChild(priceEl);
-
-  // Desc
-  const desc = document.createElement('div');
-  desc.className = 'menu-item-desc';
-  desc.textContent = item.desc;
-
-  // Actions row: [−][qty][+]  [Add to Cart]
-  const actions = document.createElement('div');
-  actions.className = 'menu-item-actions';
-
-  // Qty control
-  const qtyCtrl = document.createElement('div');
-  qtyCtrl.className = 'menu-qty-ctrl';
-
-  const btnMinus = document.createElement('button');
-  btnMinus.className = 'menu-qty-btn';
-  btnMinus.textContent = '−';
-  btnMinus.addEventListener('click', () => menuAdjustQty(shop, item, -1));
-
-  const qtyNum = document.createElement('span');
-  qtyNum.className = 'menu-qty-num';
-  qtyNum.id = 'mqty-' + item.id;
-  qtyNum.textContent = qty;
-
-  const btnPlus = document.createElement('button');
-  btnPlus.className = 'menu-qty-btn';
-  btnPlus.textContent = '+';
-  btnPlus.addEventListener('click', () => menuAdjustQty(shop, item, 1));
-
-  qtyCtrl.appendChild(btnMinus);
-  qtyCtrl.appendChild(qtyNum);
-  qtyCtrl.appendChild(btnPlus);
-
-  // Add to Cart button
-  const addBtn = document.createElement('button');
-  addBtn.className = 'menu-add-btn' + (qty > 0 ? ' in-cart' : '');
-  addBtn.id = 'madd-' + item.id;
-  addBtn.innerHTML = qty > 0
-    ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> In Cart`
-    : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg> Add to Cart`;
-  addBtn.addEventListener('click', () => menuAddToCart(shop, item));
-
-  actions.appendChild(qtyCtrl);
-  actions.appendChild(addBtn);
-
-  body.appendChild(top);
-  body.appendChild(desc);
-  body.appendChild(actions);
-  wrapper.appendChild(photoWrap);
-  wrapper.appendChild(body);
-  return wrapper;
+  return div;
 }
 
 // ═══════════════ SHOP MODAL ═════════════════════
