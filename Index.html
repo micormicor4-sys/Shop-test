@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Micor — Student Food Delivery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:        #0d0f14;
+    --surface:   #161920;
+    --card:      #1e222e;
+    --border:    #2a2f3f;
+    --accent:    #f0c040;
+    --accent2:   #ff6b5b;
+    --green:     #4ade80;
+    --text:      #f0f0f0;
+    --muted:     #7a8099;
+    --radius:    14px;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  button { cursor: pointer; border: none; font-family: var(--font-body); }
+  input, textarea { font-family: var(--font-body); }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999; opacity: .5;
+  }
+
+  /* ── TABS ───────────────────────────────── */
+  #tabs-bar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(22,25,32,0.97);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-around; align-items: center;
+    padding: 10px 0 18px;
+    z-index: 100;
+  }
+  .tab-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    background: none; color: var(--muted);
+    font-size: 10px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    transition: color .2s; padding: 4px 20px; position: relative;
+  }
+  .tab-btn svg { width: 22px; height: 22px; }
+  .tab-btn.active { color: var(--accent); }
+  .tab-btn .badge {
+    position: absolute; top: 0; right: 12px;
+    background: var(--accent2); color: #fff;
+    font-size: 9px; font-weight: 700;
+    border-radius: 99px; padding: 1px 5px; display: none;
+  }
+  .tab-btn .badge.show { display: block; }
+
+  /* ── PAGES ──────────────────────────────── */
+  .page { display: none; min-height: 100vh; padding-bottom: 90px; }
+  .page.active { display: block; }
+
+  /* ── HERO ───────────────────────────────── */
+  #hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    background: radial-gradient(ellipse 80% 60% at 50% 30%, #1e1a05 0%, var(--bg) 70%);
+  }
+  .hero-glow {
+    position: absolute; width: 500px; height: 500px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(240,192,64,.18) 0%, transparent 70%);
+    top: 50%; left: 50%; transform: translate(-50%,-60%); pointer-events: none;
+  }
+  .hero-label {
+    font-size: 11px; letter-spacing: .25em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 18px;
+    background: rgba(240,192,64,.1); border: 1px solid rgba(240,192,64,.25);
+    padding: 5px 14px; border-radius: 99px;
+    animation: fadeUp .8s ease both;
+  }
+  .hero-title {
+    font-family: var(--font-head);
+    font-size: clamp(72px, 18vw, 160px);
+    font-weight: 800; line-height: .9; letter-spacing: -.04em;
+    color: var(--accent);
+    animation: fadeUp .9s ease both .1s; position: relative; z-index: 1;
+  }
+  .hero-sub {
+    font-size: 16px; color: var(--muted); font-weight: 300;
+    margin-top: 18px; text-align: center; max-width: 320px;
+    animation: fadeUp 1s ease both .2s;
+  }
+  .hero-sub span { color: var(--text); font-weight: 500; }
+  .scroll-hint {
+    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    animation: fadeUp 1s ease both .5s;
+  }
+  .scroll-arrow {
+    width: 28px; height: 28px; border: 1.5px solid var(--border); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    animation: bounce 1.6s ease-in-out infinite;
+  }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(6px)} }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── SHOPS ──────────────────────────────── */
+  #shops-section { padding: 56px 20px 24px; }
+  .section-title {
+    font-family: var(--font-head); font-size: 13px; font-weight: 700;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 28px;
+  }
+  /* loading state */
+  .loading-shops {
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .shop-skeleton {
+    height: 80px; background: var(--card); border-radius: var(--radius);
+    border: 1px solid var(--border);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
+  .load-error {
+    background: rgba(255,107,91,.1); border: 1px solid rgba(255,107,91,.3);
+    border-radius: var(--radius); padding: 18px 20px;
+    color: var(--accent2); font-size: 13px; line-height: 1.6;
+  }
+  .load-error code {
+    background: rgba(255,107,91,.15); padding: 1px 6px; border-radius: 4px;
+    font-family: monospace; font-size: 12px;
+  }
+
+  .shop-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
+    transition: border-color .2s;
+  }
+  .shop-card.open { border-color: rgba(240,192,64,.4); }
+  .shop-header {
+    display: flex; align-items: center; gap: 14px;
+    padding: 18px 20px; cursor: pointer; user-select: none;
+  }
+  .shop-icon {
+    width: 46px; height: 46px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0;
+  }
+  .shop-info { flex: 1; }
+  .shop-name { font-family: var(--font-head); font-size: 17px; font-weight: 700; }
+  .shop-tag { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .shop-chevron {
+    width: 20px; height: 20px; color: var(--muted);
+    transition: transform .3s; flex-shrink: 0;
+  }
+  .shop-card.open .shop-chevron { transform: rotate(180deg); }
+
+  .shop-menu { max-height: 0; overflow: hidden; transition: max-height .4s cubic-bezier(.4,0,.2,1); }
+  .shop-card.open .shop-menu { max-height: 3000px; }
+  .menu-inner { padding: 0 16px 16px; }
+  .menu-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; margin-bottom: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; transition: border-color .2s;
+  }
+  .menu-item:hover { border-color: rgba(240,192,64,.3); }
+  .item-emoji { font-size: 26px; flex-shrink: 0; }
+  .item-info { flex: 1; }
+  .item-name { font-size: 14px; font-weight: 500; }
+  .item-price { font-size: 13px; color: var(--accent); font-weight: 600; margin-top: 2px; }
+  .item-desc { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .qty-ctrl { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .qty-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--border); color: var(--text);
+    font-size: 16px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .qty-btn:hover { background: var(--accent); color: #000; }
+  .qty-val { font-size: 14px; font-weight: 600; min-width: 16px; text-align: center; }
+
+  /* ── CART PAGE ──────────────────────────── */
+  #cart-page { padding: 32px 20px 90px; }
+  .page-title {
+    font-family: var(--font-head); font-size: 28px; font-weight: 800;
+    margin-bottom: 24px; letter-spacing: -.02em;
+  }
+  .page-title span { color: var(--accent); }
+  .cart-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .cart-empty .big { font-size: 52px; margin-bottom: 14px; }
+  .cart-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px; margin-bottom: 10px;
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+  }
+  .cart-item-emoji { font-size: 28px; }
+  .cart-item-info { flex: 1; }
+  .cart-item-name { font-size: 14px; font-weight: 500; }
+  .cart-item-shop { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .cart-item-price { font-size: 14px; font-weight: 700; color: var(--accent); }
+  .cart-item-remove {
+    background: none; color: var(--muted); font-size: 18px;
+    padding: 4px 8px; border-radius: 6px; transition: color .15s;
+  }
+  .cart-item-remove:hover { color: var(--accent2); }
+  .cart-summary {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px; margin-top: 20px;
+  }
+  .cart-row {
+    display: flex; justify-content: space-between;
+    font-size: 14px; color: var(--muted); margin-bottom: 10px;
+  }
+  .cart-row.total {
+    font-size: 18px; font-weight: 700; color: var(--text);
+    border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;
+  }
+  .cart-row.total span:last-child { color: var(--accent); }
+  .order-form {
+    margin-top: 24px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px;
+  }
+  .order-form h3 {
+    font-family: var(--font-head); font-size: 16px; font-weight: 700;
+    margin-bottom: 16px;
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block; font-size: 11px; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+  }
+  .form-group input, .form-group textarea {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; color: var(--text); font-size: 14px;
+    padding: 12px 14px; outline: none; transition: border-color .2s;
+  }
+  .form-group input:focus, .form-group textarea:focus { border-color: var(--accent); }
+  .form-group textarea { resize: none; height: 72px; }
+  .order-btn {
+    width: 100%; background: var(--accent); color: #000;
+    font-family: var(--font-head); font-size: 16px; font-weight: 700;
+    padding: 16px; border-radius: 12px; letter-spacing: .02em;
+    transition: opacity .2s, transform .1s; margin-top: 4px;
+  }
+  .order-btn:hover { opacity: .88; }
+  .order-btn:active { transform: scale(.98); }
+  .order-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ── HISTORY PAGE ───────────────────────── */
+  #history-page { padding: 32px 20px 90px; }
+  .history-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .history-empty .big { font-size: 52px; margin-bottom: 14px; }
+  .history-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px;
+  }
+  .history-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .history-id { font-family: var(--font-head); font-size: 13px; color: var(--accent); font-weight: 700; }
+  .history-date { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .history-status {
+    font-size: 10px; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 99px;
+  }
+  .status-sent { background: rgba(74,222,128,.15); color: var(--green); }
+  .history-items { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .history-total { font-size: 15px; font-weight: 700; color: var(--text); margin-top: 8px; }
+  .history-total span { color: var(--accent); }
+
+  /* ── TOAST ──────────────────────────────── */
+  #toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--green); color: #000; font-size: 13px; font-weight: 600;
+    padding: 10px 20px; border-radius: 99px;
+    opacity: 0; transition: opacity .3s, transform .3s;
+    z-index: 200; pointer-events: none; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.error { background: var(--accent2); color: #fff; }
+
+  /* ── SUCCESS OVERLAY ────────────────────── */
+  #success-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(13,15,20,.95); z-index: 300;
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px; text-align: center; padding: 40px;
+  }
+  #success-overlay.show { display: flex; animation: fadeUp .4s ease; }
+  .success-icon { font-size: 72px; }
+  .success-title { font-family: var(--font-head); font-size: 32px; font-weight: 800; color: var(--green); }
+  .success-msg { font-size: 15px; color: var(--muted); max-width: 280px; }
+  .success-close {
+    margin-top: 10px; background: var(--accent); color: #000;
+    font-family: var(--font-head); font-size: 14px; font-weight: 700;
+    padding: 14px 36px; border-radius: 12px;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<div id="success-overlay">
+  <div class="success-icon">🎉</div>
+  <div class="success-title">Order Sent!</div>
+  <div class="success-msg">Your order has been submitted. A student runner will pick it up shortly. Check WhatsApp for updates!</div>
+  <button class="success-close" onclick="closeSuccess()">Back to Home</button>
+</div>
+
+<!-- TABS -->
+<div id="tabs-bar">
+  <button class="tab-btn active" onclick="switchTab('home')" id="tab-home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/>
+    </svg>
+    Home
+  </button>
+  <button class="tab-btn" onclick="switchTab('cart')" id="tab-cart">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+    </svg>
+    Cart
+    <span class="badge" id="cart-badge">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('history')" id="tab-history">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+    History
+  </button>
+</div>
+
+<!-- HOME -->
+<div class="page active" id="home-page">
+  <section id="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-label">🎓 Students Only</div>
+    <div class="hero-title">Micor</div>
+    <div class="hero-sub">Order food. <span>Earn by delivering.</span><br>Built by students, for students.</div>
+    <div class="scroll-hint">
+      <div class="scroll-arrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 4l4 4 4-4"/>
+        </svg>
+      </div>
+      scroll to browse
+    </div>
+  </section>
+  <section id="shops-section">
+    <div class="section-title">🍽 Food Shops</div>
+    <div id="shops-list">
+      <!-- skeleton while loading -->
+      <div class="loading-shops">
+        <div class="shop-skeleton"></div>
+        <div class="shop-skeleton"></div>
+        <div class="shop-skeleton"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- CART -->
+<div class="page" id="cart-page">
+  <div class="page-title">Your <span>Cart</span></div>
+  <div id="cart-content"></div>
+</div>
+
+<!-- HISTORY -->
+<div class="page" id="history-page">
+  <div class="page-title">Order <span>History</span></div>
+  <div id="history-content"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  ⚠️  REPLACE WITH YOUR DISCORD WEBHOOK URL
+// ══════════════════════════════════════════════════════
+const DISCORD_WEBHOOK = "YOUR_DISCORD_WEBHOOK_URL";
+
+// ═══════════ STATE ════════════════════════════════════
+let shops = [];
+let cart    = JSON.parse(localStorage.getItem('micor_cart')    || '[]');
+let history = JSON.parse(localStorage.getItem('micor_history') || '[]');
+
+function saveCart()    { localStorage.setItem('micor_cart',    JSON.stringify(cart)); }
+function saveHistory() { localStorage.setItem('micor_history', JSON.stringify(history)); }
+
+// ═══════════ LOAD SHOPS.JSON ══════════════════════════
+async function loadShops() {
+  try {
+    const res = await fetch('shops.json');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    shops = await res.json();
+    renderShops();
+  } catch (err) {
+    document.getElementById('shops-list').innerHTML = `
+      <div class="load-error">
+        ⚠️ Could not load <code>shops.json</code>.<br><br>
+        Make sure <code>shops.json</code> is in the <strong>same folder</strong> as <code>micor.html</code>
+        and that you're opening the file through a local server (not just double-clicking).<br><br>
+        <em>Tip: Use VS Code Live Server or run <code>npx serve .</code> in the folder.</em>
+      </div>`;
+  }
+}
+
+// ═══════════ TABS ═════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(tab + '-page').classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'cart')    renderCart();
+  if (tab === 'history') renderHistory();
+  window.scrollTo(0, 0);
+}
+
+// ═══════════ RENDER SHOPS ════════════════════════════
+function renderShops() {
+  const container = document.getElementById('shops-list');
+  if (!shops.length) {
+    container.innerHTML = `<div class="load-error">⚠️ shops.json is empty. Add at least one shop.</div>`;
+    return;
+  }
+  container.innerHTML = shops.map(shop => `
+    <div class="shop-card" id="shop-${shop.id}">
+      <div class="shop-header" onclick="toggleShop('${shop.id}')">
+        <div class="shop-icon" style="background:${shop.color}22;border:1px solid ${shop.color}44;">
+          ${shop.icon}
+        </div>
+        <div class="shop-info">
+          <div class="shop-name">${shop.name}</div>
+          <div class="shop-tag">${shop.tag}</div>
+        </div>
+        <svg class="shop-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </div>
+      <div class="shop-menu" id="menu-${shop.id}">
+        <div class="menu-inner">
+          ${(shop.menu || []).map(item => `
+            <div class="menu-item">
+              <div class="item-emoji">${item.emoji}</div>
+              <div class="item-info">
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">RM ${Number(item.price).toFixed(2)}</div>
+                <div class="item-desc">${item.desc}</div>
+              </div>
+              <div class="qty-ctrl">
+                <button class="qty-btn" onclick="changeQty('${shop.id}','${item.id}','${esc(shop.name)}','${esc(item.name)}',${item.price},'${item.emoji}',-1)">−</button>
+                <span class="qty-val" id="qty-${item.id}">0</span>
+                <button class="qty-btn" onclick="changeQty('${shop.id}','${item.id}','${esc(shop.name)}','${esc(item.name)}',${item.price},'${item.emoji}',1)">+</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `).join('');
+  syncQtyDisplays();
+}
+
+function esc(s) { return s.replace(/'/g, "\\'"); }
+
+function toggleShop(id) {
+  document.getElementById('shop-' + id).classList.toggle('open');
+}
+
+function syncQtyDisplays() {
+  // reset all first
+  document.querySelectorAll('.qty-val').forEach(el => el.textContent = '0');
+  cart.forEach(ci => {
+    const el = document.getElementById('qty-' + ci.itemId);
+    if (el) el.textContent = ci.qty;
+  });
+}
+
+// ═══════════ CART LOGIC ══════════════════════════════
+function changeQty(shopId, itemId, shopName, itemName, price, emoji, delta) {
+  const idx = cart.findIndex(c => c.itemId === itemId);
+  if (idx === -1 && delta > 0) {
+    cart.push({ shopId, itemId, shopName, itemName, price: Number(price), emoji, qty: 1 });
+  } else if (idx !== -1) {
+    cart[idx].qty += delta;
+    if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  }
+  saveCart();
+  const el = document.getElementById('qty-' + itemId);
+  const ci = cart.find(c => c.itemId === itemId);
+  if (el) el.textContent = ci ? ci.qty : 0;
+  updateBadge();
+  if (delta > 0) showToast('Added to cart 🛒');
+}
+
+function updateBadge() {
+  const total = cart.reduce((s, c) => s + c.qty, 0);
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = total;
+  badge.classList.toggle('show', total > 0);
+}
+
+function removeFromCart(itemId) {
+  cart = cart.filter(c => c.itemId !== itemId);
+  saveCart(); updateBadge(); syncQtyDisplays(); renderCart();
+}
+
+// ═══════════ RENDER CART ═════════════════════════════
+function renderCart() {
+  const container = document.getElementById('cart-content');
+  if (!cart.length) {
+    container.innerHTML = `
+      <div class="cart-empty">
+        <div class="big">🛒</div>
+        <p>Your cart is empty.<br>Browse shops to add items!</p>
+      </div>`;
+    return;
+  }
+  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const delivery = 1.50;
+  const total    = subtotal + delivery;
+  container.innerHTML = `
+    ${cart.map(ci => `
+      <div class="cart-item">
+        <div class="cart-item-emoji">${ci.emoji}</div>
+        <div class="cart-item-info">
+          <div class="cart-item-name">${ci.itemName} × ${ci.qty}</div>
+          <div class="cart-item-shop">${ci.shopName}</div>
+        </div>
+        <div class="cart-item-price">RM ${(ci.price * ci.qty).toFixed(2)}</div>
+        <button class="cart-item-remove" onclick="removeFromCart('${ci.itemId}')">×</button>
+      </div>
+    `).join('')}
+    <div class="cart-summary">
+      <div class="cart-row"><span>Subtotal</span><span>RM ${subtotal.toFixed(2)}</span></div>
+      <div class="cart-row"><span>Runner Fee</span><span>RM ${delivery.toFixed(2)}</span></div>
+      <div class="cart-row total"><span>Total</span><span>RM ${total.toFixed(2)}</span></div>
+    </div>
+    <div class="order-form">
+      <h3>📋 Your Details</h3>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="order-name" placeholder="e.g. Ahmad Zulkifli" />
+      </div>
+      <div class="form-group">
+        <label>WhatsApp Number</label>
+        <input type="tel" id="order-wa" placeholder="e.g. 0123456789" />
+      </div>
+      <div class="form-group">
+        <label>Delivery Location</label>
+        <input type="text" id="order-loc" placeholder="e.g. Block A Room 312 / Library" />
+      </div>
+      <div class="form-group">
+        <label>Note to Runner (optional)</label>
+        <textarea id="order-note" placeholder="e.g. No spicy, extra sauce..."></textarea>
+      </div>
+      <button class="order-btn" onclick="placeOrder()">🚀 Place Order</button>
+    </div>
+  `;
+}
+
+// ═══════════ PLACE ORDER ═════════════════════════════
+async function placeOrder() {
+  const name = document.getElementById('order-name')?.value.trim();
+  const wa   = document.getElementById('order-wa')?.value.trim();
+  const loc  = document.getElementById('order-loc')?.value.trim();
+  const note = document.getElementById('order-note')?.value.trim();
+
+  if (!name) { showToast('Please enter your name ✏️', true); return; }
+  if (!wa)   { showToast('Please enter your WhatsApp number 📱', true); return; }
+  if (!loc)  { showToast('Please enter your delivery location 📍', true); return; }
+
+  const btn = document.querySelector('.order-btn');
+  btn.disabled = true; btn.textContent = '⏳ Sending...';
+
+  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const total    = subtotal + 1.50;
+  const orderId  = 'MIC-' + Date.now().toString(36).toUpperCase();
+  const itemsList = cart.map(c => `• ${c.emoji} ${c.itemName} ×${c.qty} — RM ${(c.price*c.qty).toFixed(2)} (${c.shopName})`).join('\n');
+
+  const payload = {
+    username: "Micor Orders 🛵",
+    embeds: [{
+      title: `🆕 New Order — ${orderId}`,
+      color: 0xf0c040,
+      fields: [
+        { name: "👤 Student Name",              value: name,                          inline: true  },
+        { name: "📱 WhatsApp",                  value: wa,                            inline: true  },
+        { name: "📍 Delivery Location",         value: loc,                           inline: false },
+        { name: "🛒 Items Ordered",             value: itemsList,                     inline: false },
+        { name: "💰 Total (incl. runner fee)",  value: `RM ${total.toFixed(2)}`,      inline: true  },
+        ...(note ? [{ name: "📝 Note", value: note, inline: false }] : [])
+      ],
+      footer: { text: `Micor Student Delivery • ${new Date().toLocaleString()}` }
+    }]
+  };
+
+  try {
+    if (DISCORD_WEBHOOK !== "YOUR_DISCORD_WEBHOOK_URL") {
+      const res = await fetch(DISCORD_WEBHOOK, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Webhook error');
+    } else {
+      // Demo mode
+      await new Promise(r => setTimeout(r, 1000));
+    }
+
+    history.unshift({ id: orderId, date: new Date().toLocaleString(), name, wa, loc, note, items: [...cart], total });
+    saveHistory();
+    cart = []; saveCart(); updateBadge(); syncQtyDisplays();
+    document.getElementById('success-overlay').classList.add('show');
+  } catch {
+    showToast('Failed to send order. Try again!', true);
+    btn.disabled = false; btn.textContent = '🚀 Place Order';
+  }
+}
+
+function closeSuccess() {
+  document.getElementById('success-overlay').classList.remove('show');
+  switchTab('home');
+}
+
+// ═══════════ RENDER HISTORY ══════════════════════════
+function renderHistory() {
+  const container = document.getElementById('history-content');
+  if (!history.length) {
+    container.innerHTML = `
+      <div class="history-empty">
+        <div class="big">📦</div>
+        <p>No orders yet.<br>Place your first order!</p>
+      </div>`;
+    return;
+  }
+  container.innerHTML = history.map(h => `
+    <div class="history-card">
+      <div class="history-top">
+        <div>
+          <div class="history-id">${h.id}</div>
+          <div class="history-date">${h.date}</div>
+        </div>
+        <div class="history-status status-sent">Sent ✓</div>
+      </div>
+      <div class="history-items">
+        ${h.items.map(i => `${i.emoji} ${i.itemName} ×${i.qty}`).join(' · ')}
+      </div>
+      <div class="history-total">Total: <span>RM ${h.total.toFixed(2)}</span></div>
+    </div>
+  `).join('');
+}
+
+// ═══════════ TOAST ════════════════════════════════════
+let toastTimer;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 2200);
+}
+
+// ═══════════ INIT ═════════════════════════════════════
+loadShops();
+updateBadge();
+</script>
+</body>
+</html>
