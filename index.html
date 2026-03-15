@@ -89,7 +89,7 @@
   }
   .hero-sub span { color: var(--text); font-weight: 500; }
   .scroll-hint {
-    position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+    position: absolute; bottom: 36px; left: 0; right: 0;
     display: flex; flex-direction: column; align-items: center; gap: 8px;
     color: var(--muted); font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
     animation: fadeUp 1s ease both .5s;
@@ -341,9 +341,9 @@
 <div class="page active" id="home-page">
   <section id="hero">
     <div class="hero-glow"></div>
-    <div class="hero-label">🎓 Students Only</div>
+    <div class="hero-label">🛵 Student Delivery Services</div>
     <div class="hero-title">Micor</div>
-    <div class="hero-sub">Order food. <span>Earn by delivering.</span><br>Built by students, for students.</div>
+    <div class="hero-sub">Order food. <span>Delivered to you.</span></div>
     <div class="scroll-hint">
       <div class="scroll-arrow">
         <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 4l4 4 4-4"/></svg>
@@ -544,7 +544,12 @@ function buildMenuItemEl(shop, item) {
 }
 
 function toggleShop(id) {
-  document.getElementById('shop-' + id).classList.toggle('open');
+  const target = document.getElementById('shop-' + id);
+  const isOpen = target.classList.contains('open');
+  // close all shops first
+  document.querySelectorAll('.shop-card').forEach(c => c.classList.remove('open'));
+  // if it wasn't open, open it
+  if (!isOpen) target.classList.add('open');
 }
 
 // ═══════════════ MENU QTY LOGIC ═════════════════
