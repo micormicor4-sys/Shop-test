@@ -1,0 +1,58 @@
+[
+  {
+    "id": "mamak",
+    "name": "Warung Mamak",
+    "icon": "🍛",
+    "color": "#f59e0b",
+    "tag": "Nasi · Mee · Kuih · Drinks",
+    "menu": [
+      { "id": "nasi_lemak",   "name": "Nasi Lemak Ayam",      "price": 7.50, "emoji": "🍚", "desc": "Classic coconut rice with crispy fried chicken" },
+      { "id": "mee_goreng",   "name": "Mee Goreng Mamak",     "price": 6.00, "emoji": "🍜", "desc": "Spicy stir-fried yellow noodles" },
+      { "id": "roti_canai",   "name": "Roti Canai + Dhal",    "price": 2.50, "emoji": "🫓", "desc": "Flaky flatbread with lentil curry" },
+      { "id": "teh_tarik",    "name": "Teh Tarik",            "price": 2.00, "emoji": "🧋", "desc": "Pulled milk tea, frothy & sweet" },
+      { "id": "nasi_goreng",  "name": "Nasi Goreng Special",  "price": 7.00, "emoji": "🍳", "desc": "Fried rice with egg & chicken" }
+    ]
+  },
+  {
+    "id": "cafe",
+    "name": "Campus Café",
+    "icon": "☕",
+    "color": "#6366f1",
+    "tag": "Western · Sandwiches · Coffee",
+    "menu": [
+      { "id": "chicken_chop",    "name": "Chicken Chop",       "price": 9.00, "emoji": "🍗", "desc": "Grilled chicken with mushroom sauce & fries" },
+      { "id": "club_sandwich",   "name": "Club Sandwich",      "price": 7.50, "emoji": "🥪", "desc": "Triple-decker with chicken, egg & lettuce" },
+      { "id": "pasta",           "name": "Creamy Carbonara",   "price": 8.50, "emoji": "🍝", "desc": "Spaghetti in creamy white sauce" },
+      { "id": "iced_milo",       "name": "Iced Milo",          "price": 3.00, "emoji": "🥛", "desc": "Cold chocolate malt drink" },
+      { "id": "latte",           "name": "Iced Latte",         "price": 4.00, "emoji": "☕", "desc": "Smooth espresso with cold milk" }
+    ]
+  },
+  {
+    "id": "jajan",
+    "name": "Jajan Corner",
+    "icon": "🧆",
+    "color": "#ec4899",
+    "tag": "Snacks · Burgers · Fries",
+    "menu": [
+      { "id": "burger_daging",  "name": "Ramly Burger Special",     "price": 5.00, "emoji": "🍔", "desc": "Classic Ramly patty with egg & cheese" },
+      { "id": "fries",          "name": "Cheesy Fries",             "price": 4.50, "emoji": "🍟", "desc": "Crispy fries loaded with cheese sauce" },
+      { "id": "hotdog",         "name": "Jumbo Hot Dog",            "price": 4.00, "emoji": "🌭", "desc": "Grilled sausage in toasted bun" },
+      { "id": "nuggets",        "name": "Chicken Nuggets (8pcs)",   "price": 5.50, "emoji": "🐔", "desc": "Golden crispy nuggets with sauce" },
+      { "id": "air_limau",      "name": "Iced Lime Juice",          "price": 2.50, "emoji": "🍋", "desc": "Fresh squeezed lime with soda" }
+    ]
+  },
+  {
+    "id": "sihat",
+    "name": "Makan Sihat",
+    "icon": "🥗",
+    "color": "#4ade80",
+    "tag": "Healthy · Rice Bowls · Smoothies",
+    "menu": [
+      { "id": "rice_bowl",       "name": "Grilled Chicken Rice Bowl", "price": 8.00, "emoji": "🥣", "desc": "Brown rice, grilled chicken, veggies" },
+      { "id": "salad",           "name": "Garden Salad",              "price": 6.50, "emoji": "🥗", "desc": "Fresh mix with balsamic dressing" },
+      { "id": "smoothie_mango",  "name": "Mango Smoothie",            "price": 5.00, "emoji": "🥭", "desc": "Fresh mango blended with yoghurt" },
+      { "id": "wrap",            "name": "Tuna Wrap",                 "price": 7.00, "emoji": "🌯", "desc": "Tuna mayo wrapped in a tortilla" },
+      { "id": "oat",             "name": "Overnight Oats",            "price": 5.50, "emoji": "🌾", "desc": "Oats with chia, banana & honey" }
+    ]
+  }
+]
