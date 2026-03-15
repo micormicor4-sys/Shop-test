@@ -129,14 +129,16 @@ input,textarea{font-family:var(--fb)}
 #modal{
   position:fixed;inset:0;z-index:600;
   display:flex;flex-direction:column;justify-content:flex-end;
-  pointer-events:none;
 }
-#modal.on{pointer-events:all}
 #modal-backdrop{
   position:absolute;inset:0;z-index:0;
   background:transparent;transition:background .3s;
+  pointer-events:none;
 }
-#modal.on #modal-backdrop{background:rgba(0,0,0,.65)}
+#modal.on #modal-backdrop{
+  background:rgba(0,0,0,.65);
+  pointer-events:auto;
+}
 #modal-sheet{
   position:relative;z-index:2;
   background:var(--bg);
@@ -145,8 +147,12 @@ input,textarea{font-family:var(--fb)}
   display:flex;flex-direction:column;
   transform:translateY(100%);
   transition:transform .35s cubic-bezier(.4,0,.2,1);
+  pointer-events:none;
 }
-#modal.on #modal-sheet{transform:translateY(0)}
+#modal.on #modal-sheet{
+  transform:translateY(0);
+  pointer-events:auto;
+}
 .modal-pill{
   width:40px;height:4px;border-radius:2px;
   background:var(--border);margin:14px auto 0;flex-shrink:0;
@@ -574,7 +580,6 @@ function closeModal() {
 
 document.getElementById('modal-close').addEventListener('click', closeModal);
 document.getElementById('modal-backdrop').addEventListener('click', closeModal);
-document.getElementById('modal-sheet').addEventListener('click', e => e.stopPropagation());
 
 // ══════════════════════════════════════════
 // MAKE MENU ITEM
